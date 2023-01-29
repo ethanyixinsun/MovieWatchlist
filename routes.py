@@ -5,6 +5,7 @@ from flask import (
     session,
     request,
 )
+from forms import MovieForm
 
 
 pages = Blueprint(
@@ -17,6 +18,18 @@ def index():
     return render_template(
         "index.html",
         title="Movies Watchlist",
+    )
+
+
+@pages.route("/add", methods=["GET", "POST"])
+def add_movie():
+    form = MovieForm()
+
+    if request.method == "POST":
+        pass
+
+    return render_template(
+        "new_movie.html", title="Movies Watchlist - Add Movie", form=form
     )
 
 
