@@ -1,4 +1,5 @@
 import uuid
+import datetime
 from dataclasses import asdict
 
 from flask import (
@@ -56,6 +57,15 @@ def add_movie():
 def movie(_id: str):
     movie = Movie(**current_app.db.movie.find_one({"_id": _id}))
     return render_template("movie_details.html", movie=movie)
+
+
+@pages.get("/movie/<string:_id>/watch")
+def watch_today(_id):
+    current_app.db.movie.update_one(
+        {"_id": _id}, {"$set": {"last_watched": datetime.datetime.today()}}
+    )
+
+    return redirect(url_for(".movie", _id=_id))
 
 
 @pages.get("/movie/<string:_id>/rate")
