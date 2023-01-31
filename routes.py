@@ -5,14 +5,16 @@ from dataclasses import asdict
 from flask import (
     Blueprint,
     current_app,
+    flash,
     redirect,
     render_template,
     session,
     url_for,
     request,
 )
-from forms import MovieForm, ExtendedMovieForm
-from models import Movie
+from forms import RegisterForm, MovieForm, ExtendedMovieForm
+from models import User, Movie
+from passlib.hash import pbkdf2_sha256
 
 
 pages = Blueprint(
@@ -29,6 +31,31 @@ def index():
         "index.html",
         title="Movies Watchlist",
         movies_data=movies,
+    )
+
+
+@pages.route("/register", methods=["POST", "GET"])
+def register():
+    if session.get("email"):
+        return redirect(url_for(".index"))
+
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        user = User(
+            _id=uuid.uuid4().hex,
+            email=form.email.data,
+            password=pbkdf2_sha256.hash(form.password.data),
+        )
+
+        current_app.db.user.insert_one(asdict(user))
+
+        flash("User registered successfully", "success")
+
+        return redirect(url_for(".index"))
+
+    return render_template(
+        "register.html", title="Movies Watchlist - Register", form=form
     )
 
 
